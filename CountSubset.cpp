@@ -6,6 +6,7 @@
 #include <climits> // INT_MAX
 #include <algorithm> // std::include
 
+
 struct min_subset { int num = INT_MAX; std::set<std::set<std::set<int>>> collection; };
 
 void print_set(std::set<int> S);
@@ -15,11 +16,13 @@ std::set<std::set<int>> choose(int total, int num);
 std::vector<std::set<std::set<int>>> sort_collection(std::set<std::set<int>> C, int n);
 min_subset minimum_subset(int k, std::set<std::set<int>> C, std::vector<std::set<std::set<int>>> P_sorted);
 int count_subset(int k, std::set<std::set<int>> C, std::vector<std::set<std::set<int>>> P_sorted);
+void count_subset_t(int k, std::vector<std::set<std::set<int>>> P_sorted);
+void count_subset_all(int k, std::vector<std::set<std::set<int>>> P_sorted);
 
 int main() {
 
   std::set<int> X;
-  int n, k, t;
+  int n, k;
   
   // Constructing X
 
@@ -49,7 +52,14 @@ int main() {
   std::vector<std::set<std::set<int>>> P_sorted = sort_collection(P, n);
   std::cout << "Sorting of the power set of X is complete.\n\n";
 
-  // Constructing choices of t sets from the collection of sets of size k
+  std::cout << "The number of sets in each layer:";
+  for (int i = 0; i < n + 1; ++i)
+  {
+    std::cout << ' ' << P_sorted[i].size();
+  }
+  std::cout << "\n\n";
+
+  // Set k
 
   std::cout << "Set the size of subsets of X [k]: ";
   std::cin >> k;
@@ -58,50 +68,23 @@ int main() {
   std::cout << "There are " << P_sorted[k].size()
     << " subsets of X that contains k=" << k << " elements.\n\n";
 
-  std::cout << "Set the number of sets [t]: ";
-  std::cin >> t;
+  // Ask user whether to compute the minimum number of subsets for a specific t
+  // or to compute them for all t.
+
+  std::cout << "Type any non-zero integer to set a specific t or 0 to compute for all t: ";
+  int ans;
+  std::cin >> ans;
   std::cout << "\n";
 
-  std::cout << "Constructing all choices of A_1,...,A_" << t
-    << " from the collection of " << P_sorted[k].size() << " sets...\n";
-  std::set<std::set<int>> C = choose(int(P_sorted[k].size()), t);
-  std::cout << "The construction is complete. There are "
-    << C.size() << " (" << P_sorted[k].size() << " choose " << t << ") many choices.\n\n";
-
-  // Computing the minimum number of subsets of t-many sets of size k
-  std::cout << "Computing the minimum number of sets of size " << k-1
-    << " that are subsets of at least one of A_1,...,A_" << t <<
-    " across " << C.size() << " many choices of such sets...\n";
-  min_subset val = minimum_subset(k, C, P_sorted);
-  std::cout << "The computation is complete. The minimum number is "
-    << val.num << ".\n\n";
-
-  std::cout << "There are " << val.collection.size()
-    << " collection(s) that achieve the minimum number.\n\n";
-  std::cout << "The first five collections are:\n\n";
-  int counter = 0;
-  int ans = 0;
-  for (auto it = val.collection.begin(); it != val.collection.end(); ++it)
+  if (ans)
   {
-    print_collection(*it);
-    std::cout << "\n\n";
-    if (++counter == 5)
-    {
-      std::cout << "Type any non-zero integer to continue or 0 to terminate: ";
-      std::cin >> ans;
-      std::cout << "\n";
-      if (ans)
-      {
-        counter = 0;
-        continue;
-      }
-      else
-      {
-        break;
-      }
-    }
+    count_subset_t(k, P_sorted);
   }
-  
+  else
+  {
+    count_subset_all(k, P_sorted);
+  }
+
   std::system("pause");
 
   return 0;
@@ -268,5 +251,82 @@ int count_subset(int k, std::set<std::set<int>> C, std::vector<std::set<std::set
   }
 
   return num;
+
+}
+
+void count_subset_t(int k, std::vector<std::set<std::set<int>>> P_sorted) {
+
+  int t;
+
+  std::cout << "Set the number of sets [t]: ";
+  std::cin >> t;
+  std::cout << "\n";
+
+  // Constructing choices of t sets from the collection of sets of size k
+
+  std::cout << "Constructing all choices of A_1,...,A_" << t
+    << " from the collection of " << P_sorted[k].size() << " sets...\n";
+  std::set<std::set<int>> C = choose(int(P_sorted[k].size()), t);
+  std::cout << "The construction is complete. There are "
+    << C.size() << " (" << P_sorted[k].size() << " choose " << t << ") many choices.\n\n";
+
+  // Computing the minimum number of subsets of t-many sets of size k
+
+  std::cout << "Computing the minimum number of sets of size " << k - 1
+    << " that are subsets of at least one of A_1,...,A_" << t <<
+    " across " << C.size() << " many choices of such sets...\n";
+  min_subset val = minimum_subset(k, C, P_sorted);
+  std::cout << "The computation is complete. The minimum number is "
+    << val.num << ".\n\n";
+
+  std::cout << "There are " << val.collection.size()
+    << " collection(s) that achieve the minimum number.\n\n";
+  std::cout << "The first five collections are:\n\n";
+  int counter = 0;
+  int ans = 0;
+  for (auto it = val.collection.begin(); it != val.collection.end(); ++it)
+  {
+    print_collection(*it);
+    std::cout << "\n\n";
+    if (++counter == 5)
+    {
+      std::cout << "Type any non-zero integer to continue or 0 to terminate: ";
+      std::cin >> ans;
+      std::cout << "\n";
+      if (ans)
+      {
+        counter = 0;
+        continue;
+      }
+      else
+      {
+        break;
+      }
+    }
+  }
+
+}
+
+void count_subset_all(int k, std::vector<std::set<std::set<int>>> P_sorted) {
+
+  int t;
+
+  // Execute, for each t, the same process as function count_subset_t
+
+  for (t = 1; t <= P_sorted[k].size(); ++t)
+  {
+    std::set<std::set<int>> C = choose(int(P_sorted[k].size()), t);
+    min_subset val = minimum_subset(k, C, P_sorted);
+    std::cout << "t = " << t << "\tMIN = " << val.num << "\n\n";
+  }
+    
+  if (k)
+  {
+    std::cout << "n Choose k-1 = " << P_sorted[k - 1].size() << "\n\n";
+  }
+  else
+  {
+    std::cout << "n Choose k-1 = 0\n\n";
+  }
 
 }
