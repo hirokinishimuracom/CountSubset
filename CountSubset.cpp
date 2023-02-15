@@ -1,3 +1,16 @@
+// CountSubset
+// 
+// This program does the following.
+// 
+// (1) A user sets integer variables [n,k,t].
+// (2) A set X = {1,2,...,n} is constructed.
+// (3) C is constructed as any collection of t-many subsets
+//     of X of size k.
+// (4) Compute the number of sets of size k-1 that are subsets
+//     of at least one member of C. 
+// (5) Report the minimum number computed in (4) among all possible
+//     collections C that meet the construction criteria in (3).
+
 #include <iostream>
 #include <cstdlib>
 #include <set>
@@ -5,7 +18,6 @@
 #include <iterator> // std::next
 #include <climits> // INT_MAX
 #include <algorithm> // std::include
-
 
 struct min_subset { int num = INT_MAX; std::set<std::set<std::set<int>>> collection; };
 
@@ -16,7 +28,7 @@ std::set<std::set<int>> choose(int total, int num);
 std::vector<std::set<std::set<int>>> sort_collection(std::set<std::set<int>> C, int n);
 min_subset minimum_subset(int k, std::set<std::set<int>> C, std::vector<std::set<std::set<int>>> P_sorted);
 int count_subset(int k, std::set<std::set<int>> C, std::vector<std::set<std::set<int>>> P_sorted);
-void count_subset_t(int k, std::vector<std::set<std::set<int>>> P_sorted);
+void count_subset_t(int k, int t, std::vector<std::set<std::set<int>>> P_sorted);
 void count_subset_all(int k, std::vector<std::set<std::set<int>>> P_sorted);
 
 int main() {
@@ -71,14 +83,14 @@ int main() {
   // Ask user whether to compute the minimum number of subsets for a specific t
   // or to compute them for all t.
 
-  std::cout << "Type any non-zero integer to set a specific t or 0 to compute for all t: ";
-  int ans;
-  std::cin >> ans;
+  std::cout << "Set the number of sets [t] or 0 to compute for all t: ";
+  int t;
+  std::cin >> t;
   std::cout << "\n";
 
-  if (ans)
+  if (t)
   {
-    count_subset_t(k, P_sorted);
+    count_subset_t(k, t, P_sorted);
   }
   else
   {
@@ -254,13 +266,7 @@ int count_subset(int k, std::set<std::set<int>> C, std::vector<std::set<std::set
 
 }
 
-void count_subset_t(int k, std::vector<std::set<std::set<int>>> P_sorted) {
-
-  int t;
-
-  std::cout << "Set the number of sets [t]: ";
-  std::cin >> t;
-  std::cout << "\n";
+void count_subset_t(int k, int t, std::vector<std::set<std::set<int>>> P_sorted) {
 
   // Constructing choices of t sets from the collection of sets of size k
 
